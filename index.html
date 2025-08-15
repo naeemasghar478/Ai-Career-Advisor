@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Career Advisor - Pakistan</title>
+<style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f4f7fb; color: #333; }
+    header { background: #003366; color: white; padding: 20px; text-align: center; }
+    header h1 { margin: 0; font-size: 28px; }
+    header p { margin: 5px 0 0; font-size: 16px; }
+    section { max-width: 900px; margin: auto; padding: 20px; text-align: center; }
+    .btn-primary { background: #0055a5; color: white; padding: 12px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    .btn-primary:hover { background: #004080; }
+    #chatSection { margin-top: 40px; display: flex; justify-content: center; }
+    #chatContainer { width: 100%; max-width: 400px; height: 600px; background: white; border-radius: 15px; box-shadow: 0px 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+    #messages { flex: 1; padding: 15px; overflow-y: auto; }
+    .msg { margin: 10px 0; padding: 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word; }
+    .bot { background: #e1f0fa; align-self: flex-start; }
+    .user { background: #cfe9ff; align-self: flex-end; }
+    #inputArea { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+    input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 10px; }
+    button { padding: 10px 15px; background: #0055a5; color: white; border: none; border-radius: 10px; margin-left: 10px; cursor: pointer; }
+    button:hover { background: #004080; }
+    footer { background: #003366; color: white; padding: 15px; text-align: center; margin-top: 40px; }
+    @media (max-width: 500px) {
+        #chatContainer { height: 500px; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>AI Career Advisor</h1>
+    <p>Helping Pakistani students choose the right career path</p>
+</header>
+
+<section>
+    <h2>About This Tool</h2>
+    <p>Our AI-powered career advisor helps students in Pakistan discover the best career options based on their skills, grades, and interests. Get personalized guidance to shape your future in just a few questions.</p>
+    <button class="btn-primary" onclick="document.getElementById('chatSection').scrollIntoView({behavior: 'smooth'})">Start Chat</button>
+</section>
+
+<section id="chatSection">
+    <div id="chatContainer">
+        <div id="messages"></div>
+        <div id="inputArea">
+            <input type="text" id="userInput" placeholder="Type your answer...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</section>
+
+<footer>
+    &copy; 2025 AI Career Advisor | Designed for Pakistani Students
+</footer>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbyN2BNato_XjFUvpvSDQ6oBcM2HrM90K8fzX3Wa8PKayChO7Fojd_GMl6XWD08idXvl/exec";
+
+let step = 0;
+let formData = {};
+
+const questions = [
+    "Hello! Welcome to AI Career Advisor. What's your name?",
+    "Great! How old are you?",
+    "Which city do you live in?",
+    "Please list your main skills.",
+    "What are your grades or marks?",
+    "What fields or careers are you interested in?"
+];
+
+function appendMessage(content, sender) {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `msg ${sender}`;
+    msgDiv.textContent = content;
+    document.getElementById("messages").appendChild(msgDiv);
+    document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+}
+
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
+
+    appendMessage(message, "user");
+    input.value = "";
+
+    if (step < questions.length) {
+        handleAnswer(message);
+    }
+}
+
+function handleAnswer(answer) {
+    switch(step) {
+        case 0: formData.name = answer; break;
+        case 1: formData.age = answer; break;
+        case 2: formData.city = answer; break;
+        case 3: formData.skills = answer; break;
+        case 4: formData.grades = answer; break;
+        case 5: formData.interests = answer; break;
+    }
+
+    step++;
+    if (step < questions.length) {
+        setTimeout(() => appendMessage(questions[step], "bot"), 500);
+    } else {
+        appendMessage("Thanks! Let me analyze your profile...", "bot");
+        sendToServer();
+    }
+}
+
+function sendToServer() {
+    const fd = new FormData();
+    for (const key in formData) {
+        fd.append(key, formData[key]);
+    }
+
+    fetch(scriptURL, { method: "POST", body: fd })
+    .then(res => res.text())
+    .then(advice => {
+        appendMessage(advice, "bot");
+    })
+    .catch(err => console.error(err));
+}
+
+// Start chat
+appendMessage(questions[0], "bot");
+</script>
+
+</body>
+</html>
